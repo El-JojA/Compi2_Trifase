@@ -1,0 +1,20 @@
+public class extras{
+	public static int var = 0;
+
+	public extras(){
+		if(true)
+			if(false)
+				if(true&&false)
+					while(true)
+						Texto("extras!", 10, 20, 255, 255, 255)
+						extras.var = 9
+	}
+	
+	public static void sumar(){
+		for(i = 50, i > 0, i--)
+			if(true)
+				Texto("extras!", 10, 20, 255, 255, 255)
+			else				
+				Texto("extras!", 10, 20, 255, 255, 255)
+	}
+}

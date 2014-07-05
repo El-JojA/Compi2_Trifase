@@ -1,0 +1,21 @@
+public class prueba{
+	
+    array<int> test = new Array(2,3)
+    int atr1 = 1
+    char atr2 = 'c'
+    
+    public void fun1(){
+        int a = 1
+        int b = 2
+        int r = a * b
+
+    }
+
+    public void main(){
+        prueba pru = new prueba()
+        pru.fun1()
+        
+    }
+
+}
+

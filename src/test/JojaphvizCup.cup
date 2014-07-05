@@ -1,0 +1,189 @@
+package analisis; 
+import java_cup.runtime.*;
+import java.util.*;
+
+parser code
+
+{:
+    /**Metodo al que se llama automaticamente ante algun error sintáctico.*/
+    public void syntax_error(Symbol s)
+    {
+        //Metodos.addError("sintactico", (s.right+1), s.left, "Identificador \"" +s.value + "\" no reconocido por la gramatica");
+        System.out.println("Error sintactico en la Fila " + (s.right+1) +" Columna "+s.left+ ". Identificador \"" +s.value + "\" no reconocido." );
+    }
+
+    /**Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores.*/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    { 
+        //Metodos.addError("sintactico", (s.right+1), s.left, "Identificador \"" +s.value + "\" no reconocido por la gramatica");
+        System.out.println("Error sintactico en la Fila " + (s.right+1)+ " Columna "+s.left+". Identificador \"" + s.value + "\" no reconocido."); 
+    }
+
+:}
+
+action code 
+{:
+    int nvl = 0;
+    String nombreArchivo ="";
+:} 
+
+terminal tint, tfloat, tstring, tbool, tchar, twhile, tdo, tfor, tcontinue, tnew;
+terminal ttrue, tfalse, tbreak, tif, telse, tswitch, tcase, tdefault, tpublic, tenter;
+terminal tprivate, treturn, tvoid, tclass, textends, tthis, timport, tmain, tarray;
+terminal tmas, tmenos, tpor, tdividir, tpotencia, tmasmas, tmenosmenos;
+terminal tmenor, tmayor, tmenorigual, tmayorigual, tigualigual, tdiferente;
+terminal tpa, tpc, tca, tcc, tla, tlc, tdospuntos, tpunto, tcoma;
+terminal tor, tand, tno;
+terminal tigual, tmasigual, tmenosigual, tporigual, tdividirigual;
+terminal tentero, tdecimal, tiden, tcaracter, tcadena, tamp;
+terminal tlinea, ttexto, tarco, trectangulo, tovalo, tpoligono, tlienzo, timprimir; 
+
+non terminal INICIO, CUERPO, IMPORTS, DECLARA_CLASE, INSTRUCCIONES, DECLARA_VAR;
+non terminal DECLARADOR_VAR, INICIA_VAR, MODIFICADOR, DECLARA_ARRAY, LISTA_VALORES;
+non terminal TIPO, ASIGNACION, INCREMENTO, DECLARA_METODOS, EXTENDS, LISTA_PARAMETROS;
+non terminal CASTEO, IF, ELSE, CONDICIONES, CONDICION, OP_COMPARADOR, FOR, WHILE, DOWHILE;
+non terminal EXPRESION, EXPR_PART, EXPR, NUM, DECLARA_METODO, INSTRUCCIONESLOW, ASIGNA;
+
+precedence right tigual;
+
+precedence left tor;
+precedence left tand;
+precedence left tno, tigualigual;
+precedence left tmenor, tmenorigual, tmayor, tmayorigual;
+
+precedence left tmas, tmenos;
+precedence left tpor, tdividir;
+precedence left tpotencia;
+
+/* precedence left tpasentero, tpasfloat, tpasstring; */
+precedence left tthis, tiden, tentero, tdecimal, tcadena, tcaracter, ttrue, tfalse;
+
+start with INICIO; 
+
+INICIO          ::= CUERPO {: System.out.println("Fin"); :};
+
+CUERPO          ::= IMPORTS DECLARA_CLASE;
+
+IMPORTS         ::= IMPORTS timport tiden tpunto tiden tenter
+                    |IMPORTS tenter
+                    |;
+
+DECLARA_CLASE   ::= MODIFICADOR tclass tiden tca INSTRUCCIONES tcc;
+
+INSTRUCCIONES   ::= INSTRUCCIONES DECLARA_VAR tenter
+                    |INSTRUCCIONES DECLARA_ARRAY tenter
+                    |INSTRUCCIONES DECLARA_CLASE
+                    |INSTRUCCIONES DECLARA_METODO
+                    |tenter;
+
+INSTRUCCIONESLOW::= INSTRUCCIONESLOW DECLARA_VAR tenter 
+                    |INSTRUCCIONESLOW ASIGNA tenter
+                    |INSTRUCCIONESLOW DECLARA_ARRAY tenter
+                    |INSTRUCCIONESLOW INCREMENTO tenter
+                    |INSTRUCCIONESLOW IF
+                    |INSTRUCCIONESLOW FOR
+                    |INSTRUCCIONESLOW WHILE
+                    |INSTRUCCIONESLOW DOWHILE
+                    |tenter
+                    |;
+
+DECLARA_VAR     ::= MODIFICADOR TIPO DECLARADOR_VAR;
+
+DECLARADOR_VAR  ::= tiden tigual INICIA_VAR
+                    |tiden;
+
+INICIA_VAR      ::= EXPRESION
+                    tnew tiden tpa LISTA_VALORES tpc ;
+
+MODIFICADOR     ::= tpublic
+                    |tprivate
+                    |;
+
+DECLARA_ARRAY   ::= MODIFICADOR tarray tmenor TIPO tmayor tiden tigual tnew tarray tpa LISTA_VALORES tpc; 
+    
+LISTA_VALORES   ::= LISTA_VALORES tcoma EXPRESION
+                    |EXPRESION;
+
+TIPO            ::= tint
+                    |tfloat
+                    |tstring
+                    |tbool
+                    |tchar
+                    |tvoid
+                    |tiden
+                    |tarray tmenor TIPO tmenor ;
+
+ASIGNACION      ::= tiden tigual EXPRESION 
+                    |tthis tpunto tiden tigual EXPRESION
+                    |INCREMENTO
+                    |tthis tpunto INCREMENTO;
+
+INCREMENTO      ::= tiden tmasmas
+                    |tiden tmenosmenos;
+
+DECLARA_METODOS ::= MODIFICADOR TIPO tiden EXTENDS tpa LISTA_PARAMETROS tpc tca INSTRUCCIONESLOW tcc;
+
+EXTENDS         ::= textends tiden
+                    |;
+
+LISTA_PARAMETROS::= LISTA_PARAMETROS tcoma tamp TIPO tiden
+                    |LISTA_PARAMETROS tcoma TIPO tiden
+                    |tamp TIPO tiden
+                    |TIPO tiden;
+
+CASTEO          ::= tpa TIPO tpc EXPRESION;
+
+/** INSTRUCCION-LOW **/
+IF              ::= tif tpa CONDICIONES tpc tla INSTRUCCIONESLOW tlc ELSE;
+
+ELSE            ::= telse tla INSTRUCCIONESLOW:l tlc 
+                    |{: RESULT = null; :};
+
+CONDICIONES     ::= CONDICIONES:e1 tor CONDICIONES:e2 
+                    |CONDICIONES:e1 tand CONDICIONES:e2 
+                    |tno tpa CONDICIONES:e tpc 
+                    |tpa CONDICIONES:e tpc 
+                    |CONDICION:e  ;
+
+CONDICION       ::= EXPRESION:val1 OP_COMPARADOR:op EXPRESION:val2;
+
+
+OP_COMPARADOR   ::= tmenor          {: RESULT = new String ("<"); :}
+                    |tmayor         {: RESULT = new String (">"); :}
+                    |tmenorigual    {: RESULT = new String ("<="); :}
+                    |tmayorigual    {: RESULT = new String (">="); :}
+                    |tigualigual    {: RESULT = new String ("=="); :}
+                    |tdiferente     {: RESULT = new String ("<>"); :};
+
+/** INSTRUCCION-LOW **/
+FOR             ::= tfor tpa ASIGNACION tcoma CONDICIONES tcoma ASIGNACION tpc tla INSTRUCCIONESLOW tlc;
+
+/** INSTRUCCION-LOW **/
+WHILE           ::= twhile tpa CONDICIONES tpc tla INSTRUCCIONESLOW tlc;
+
+/** INSTRUCCION-LOW **/
+DOWHILE         ::= tdo tla INSTRUCCIONESLOW tlc twhile tpa CONDICIONES tpc;
+
+EXPRESION       ::= EXPR_PART;
+
+EXPR_PART       ::= EXPR;
+
+EXPR            ::= EXPR tmas EXPR 
+                    |EXPR tmenos EXPR 
+                    |EXPR tpor EXPR  
+                    |EXPR tdividir EXPR 
+                    |EXPR tpotencia EXPR
+                    |tpa EXPR tpc
+                    |NUM;   
+                    
+NUM             ::= tentero
+                    |tdecimal
+                    |tcadena
+                    |tcaracter
+                    |ttrue
+                    |tfalse
+                    |tiden
+                    |CASTEO
+                    |INCREMENTO;
+
+

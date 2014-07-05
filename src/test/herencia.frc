@@ -1,0 +1,16 @@
+public class herencia {
+
+    public int xp1 = 300
+    public int yp1 = 300
+    public int xp2 = 10
+    public int yp2 = 300
+    private int nivel_de_recursividad = 2
+    public float sin60 = 0.86576
+
+    public void funcion (int hola, string adios){
+    
+    int a
+    
+    }
+
+}

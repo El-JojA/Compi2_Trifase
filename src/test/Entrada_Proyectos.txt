@@ -1,0 +1,10 @@
+<Proyecto nombre="proyecto 1" ruta="C:\Users\joja\Documents\NetBeansProjects\Compi2_Trifase\src\test\"> 
+	<Archivos> 
+		<Archivo nombre="ciclos.frc" /> 
+		<Archivo nombre="condiciones.frc" /> 
+		<Archivo nombre="herencia.frc" /> 
+	</Archivos> 
+	<Principal> 
+		<Archivo nombre="ciclos.frc" /> 
+	</Principal> 
+</Proyecto>

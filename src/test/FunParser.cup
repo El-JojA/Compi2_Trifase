@@ -1,0 +1,230 @@
+package analisis; 
+import java_cup.runtime.*;
+import java.util.*;
+
+parser code
+
+{:
+    /**Metodo al que se llama automaticamente ante algun error sintáctico.*/
+    public void syntax_error(Symbol s)
+    {
+        //Metodos.addError("sintactico", (s.right+1), s.left, "Identificador \"" +s.value + "\" no reconocido por la gramatica");
+        System.out.println("Error sintactico en la Fila " + (s.right+1) +" Columna "+s.left+ ". Identificador \"" +s.value + "\" no reconocido." );
+    }
+
+    /**Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores.*/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    { 
+        //Metodos.addError("sintactico", (s.right+1), s.left, "Identificador \"" +s.value + "\" no reconocido por la gramatica");
+        System.out.println("Error sintactico en la Fila " + (s.right+1)+ " Columna "+s.left+". Identificador \"" + s.value + "\" no reconocido."); 
+    }
+
+:}
+
+action code 
+{:
+    int nvl = 0;
+    String nombreArchivo ="";
+:} 
+
+terminal tnombre, tuse, tfun, tvar, tas, tint, tfloat, tstring, tbool, tchar;
+terminal tvoid, tif, telse, tfor, twhile, tswitch, tcase, tdefault, tbreak;
+terminal ttrue, tfalse, tdel, tarchivo;
+terminal tpasentero, tpasfloat, tpasstring, timprimir, tcall, tthis, tvalue;
+terminal tminus, tmayus;
+terminal tmas, tmenos, tpor, tdividir, tconcat;
+terminal tmenor, tmayor, tmenorigual, tmayorigual, tigualigual, tdiferente;
+terminal tigual, tpuntocoma, tpa, tpc, tca, tcc, tla, tlc, tdospuntos, tpunto, tcoma;
+terminal tor, tand, tno;
+terminal tentero, tdecimal, tiden, tcaracter, tcadena, treturn;
+terminal tclass, tpublic, tprivate, timport, tarray, tnew, tamp, tdo;
+
+non terminal INICIO, CUERPO, CABECERA, IMPORTS, DECLARA_VAR, DECLARA_VAR2;
+non terminal VECTOR, VECTOR2, TIPO, PASAR_ENTERO, PASAR_FLOAT, PASAR_STRING;
+non terminal INSTRUCCIONES, INSTRUCCIONESLOW, DECLARA_FUNCION, DECLARA_ARGS;
+non terminal DECLARA_ARGS2, RETURN,OPERACION, ASIGNACION;
+non terminal NUM, VALOR;
+non terminal BOOLEAN, VALUE, FUNCION, ARGUMENTOS, ARGUMENTOS2, VARIABLE, IF;
+non terminal ELSE, CONDICIONES, CONDICION, OP_COMPARADOR, FOR, WHILE, SWITCH;
+non terminal CASES, CASES2, DEFAULT, IMPRIMIR, CALL, MINUS, MAYUS;
+non terminal VALUE_ARGS, EXPR;
+non terminal DECLARA_CLASE, MODIFICADOR, NOMBRE_CLASE, DECLARA_ARRAY, DECLARA_METODO;
+non terminal NOMBRE_IMPORT, LISTA_VALORES,DECLARADOR_VAR, INICIA_VAR, EXPRESION;
+non terminal LISTA_ARGUMENTOS, BLOQUE_INSTRUC, DOWHILE, CALL_FUNCION;
+
+
+precedence right tigual;
+
+precedence left tor;
+precedence left tand;
+precedence left tno, tigualigual;
+precedence left tmenor, tmenorigual, tmayor, tmayorigual;
+
+precedence left tmas, tmenos;
+precedence left tpor, tdividir, tconcat;
+
+precedence left tpasentero, tpasfloat, tpasstring;
+precedence left tminus, tmayus, tvalue;
+precedence left tthis, tiden, tentero, tdecimal, tcadena, tcaracter, ttrue, tfalse;
+
+start with INICIO; 
+
+INICIO          ::= CUERPO {: System.out.println("Fin"); :};
+
+CUERPO          ::= IMPORTS DECLARA_CLASE;
+
+DECLARA_CLASE   ::= MODIFICADOR NOMBRE_CLASE tca INSTRUCCIONES tcc;
+
+/* Aquí tambien tnego que poder crear objetos de clases */
+INSTRUCCIONES   ::= INSTRUCCIONES DECLARA_VAR 
+                    |INSTRUCCIONES DECLARA_ARRAY 
+                    |INSTRUCCIONES DECLARA_METODO;
+
+NOMBRE_CLASE    ::= tclass tiden;
+
+MODIFICADOR     ::= tpublic
+                    |tprivate
+                    |;
+
+IMPORTS         ::= IMPORTS timport NOMBRE_IMPORT
+                    |;
+
+
+NOMBRE_IMPORT   ::= tiden tpunto tiden;
+
+DECLARA_ARRAY   ::= MODIFICADOR tarray tmenor TIPO tmayor tiden tigual tnew tarray tpa LISTA_VALORES tpc; 
+
+DECLARA_VAR     ::= MODIFICADOR TIPO DECLARADOR_VAR;
+
+DECLARADOR_VAR  ::= DECLARADOR_VAR tcoma tiden
+                    |DECLARADOR_VAR tcoma tiden INICIA_VAR
+                    |tiden
+                    |tiden INICIA_VAR;
+
+INICIA_VAR      ::= tigual EXPRESION;
+
+DECLARA_METODO  ::= MODIFICADOR TIPO tiden tpa LISTA_ARGUMENTOS tpc BLOQUE_INSTRUC;
+
+LISTA_ARGUMENTOS::= LISTA_ARGUMENTOS tcoma tamp TIPO tiden
+                    |LISTA_ARGUMENTOS tcoma TIPO tiden
+                    |tamp TIPO tiden
+                    |TIPO tiden
+                    |;
+
+BLOQUE_INSTRUC  ::= tla INSTRUCCIONESLOW tlc;
+
+INSTRUCCIONESLOW::= INSTRUCCIONESLOW DECLARA_VAR 
+                    |INSTRUCCIONESLOW DECLARA_ARRAY 
+                    |INSTRUCCIONESLOW ASIGNACION 
+                    |INSTRUCCIONESLOW IF
+                    |INSTRUCCIONESLOW FOR
+                    |INSTRUCCIONESLOW WHILE
+                    |INSTRUCCIONESLOW DOWHILE
+                    |INSTRUCCIONESLOW SWITCH
+                    |INSTRUCCIONESLOW 
+                    |;
+
+ASIGNACION      ::= VARIABLE tigual EXPRESION;
+
+TIPO            ::= tint        {: RESULT = new String ("int"); :}
+                    |tfloat     {: RESULT = new String ("float"); :}
+                    |tstring    {: RESULT = new String ("string"); :}
+                    |tbool      {: RESULT = new String ("boolean"); :}
+                    |tchar      {: RESULT = new String ("char"); :}
+                    |tvoid      {: RESULT = new String ("void"); :}
+                    |tiden;     
+
+
+EXPRESION       ::= EXPR:e {: RESULT = (Instruccion)e; :};
+
+EXPR            ::= EXPR tmas EXPR 
+                    |EXPR tmenos EXPR 
+                    |EXPR tpor EXPR 
+                    |EXPR tdividir EXPR 
+                    |EXPR tconcat EXPR 
+                    |NUM 
+                    |tpa EXPR tpc ;
+
+NUM             ::= tentero
+                    |tdecimal 
+                    |tcadena 
+                    |tcaracter
+                    |ttrue
+                    |tfalse
+                    |VARIABLE
+                    |CALL_FUNCION;
+
+
+CALL_FUNCION    ::= VARIABLE FUNCION;
+
+FUNCION         ::= tpa ARGUMENTOS tpc
+                    |;
+
+ARGUMENTOS      ::= ARGUMENTOS tcoma EXPRESION
+                    |EXPRESION
+                    |;
+
+VARIABLE        ::= tthis tpunto tiden
+                    |tiden;
+                    
+
+
+/** INSTRUCCION-LOW **/
+IF              ::= tif tpa CONDICIONES tpc tla INSTRUCCIONESLOW tlc ELSE ;
+
+ELSE            ::= telse tla INSTRUCCIONESLOW tlc 
+                    |;
+
+CONDICIONES     ::= CONDICIONES tor CONDICIONES 
+                    |CONDICIONES tand CONDICIONES 
+                    |tno tpa CONDICIONES tpc 
+                    |tpa CONDICIONES tpc 
+                    |CONDICION ;
+
+CONDICION       ::= EXPRESION OP_COMPARADOR EXPRESION ;
+
+
+OP_COMPARADOR   ::= tmenor          {: RESULT = new String ("<"); :}
+                    |tmayor         {: RESULT = new String (">"); :}
+                    |tmenorigual    {: RESULT = new String ("<="); :}
+                    |tmayorigual    {: RESULT = new String (">="); :}
+                    |tigualigual    {: RESULT = new String ("=="); :}
+                    |tdiferente     {: RESULT = new String ("<>"); :};
+
+/** INSTRUCCION-LOW **/
+FOR             ::= tfor tpa ASIGNACION tcoma CONDICIONES tcoma ASIGNACION tpc tla INSTRUCCIONESLOW tlc ;
+
+/** INSTRUCCION-LOW **/
+WHILE           ::= twhile tpa CONDICIONES tpc tla INSTRUCCIONESLOW tlc ;
+
+/** INSTRUCCION-LOW **/
+DOWHILE         ::= tdo tla INSTRUCCIONESLOW tlc twhile tpa CONDICIONES tpc ;
+
+/** INSTRUCCION-LOW **/
+SWITCH          ::= tswitch tpa VARIABLE tpc tla CASES DEFAULT tlc ;
+
+CASES           ::= CASES tcase EXPRESION tdospuntos INSTRUCCIONESLOW tbreak
+                    |tcase EXPRESION tdospuntos INSTRUCCIONESLOW tbreak ;
+
+DEFAULT         ::= tdefault tdospuntos INSTRUCCIONESLOW tbreak 
+                    |;
+
+/**|
+No es que no sepa que me mentís, es que no me interesa tu verdad.
+**/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

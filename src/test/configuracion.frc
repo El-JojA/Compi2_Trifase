@@ -1,0 +1,22 @@
+
+public class configuracion {
+
+    private int ancho = 450
+    private int alto = 500
+    public Array<int> color = new Array(3)
+
+    public configuracion(){
+        color[0] = 255
+        color[1] = 255
+        color[2] = 255
+    }        
+            
+    public int getAlto() {
+        return alto
+    }
+
+    public int getAncho() {
+        return ancho
+    }
+}
+

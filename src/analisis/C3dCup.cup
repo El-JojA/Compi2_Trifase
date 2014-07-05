@@ -1,0 +1,136 @@
+package analisis; 
+import java_cup.runtime.*;
+import java.util.*;
+import acciones.c3d.*;
+import acciones.tablasimbolos.MetodosTS;
+
+parser code
+
+{:
+    /**Metodo al que se llama automaticamente ante algun error sintáctico.*/
+    public void syntax_error(Symbol s)
+    {
+        System.out.println("Error sintactico en la Fila " + (s.right+1) +" Columna "+s.left+ ". Identificador \"" +s.value + "\" no reconocido." );
+    }
+
+    /**Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores.*/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    { 
+        System.out.println("Error sintactico en la Fila " + (s.right+1)+ " Columna "+s.left+". Identificador \"" + s.value + "\" no reconocido."); 
+    }
+
+:}
+
+action code
+{:
+    int instruccionActual = 0;
+:}
+
+terminal tgoto, tmethod, tcall, tthen, theap, tstack, tif, tmas, tmenos, tpor; 
+terminal tdividir, tmenor, tmayor, tmenorigual, tmayorigual, tigualigual; 
+terminal tdiferente, tpa, tpc, tca, tcc, tla, tlc, tdospuntos, tpuntocoma; 
+terminal tigual, tentero, tiden, tconca, tfloattoint, tcoma, tdecimal, tcallf;
+terminal timprimir, tlinea, tarco, trectangulo, tovalo,  tpoligono, tlienzo, ttexto;
+terminal tpotencia;
+
+
+non terminal INICIO, CUERPO, METODOS, METODO, INSTRUCCIONES, INSTRUCCION; 
+non terminal ETIQUETA, GOTO, ASIGNACION, CALLF, IF, EXPRESION; 
+non terminal OP_COMPARADOR, OP_ARITMETICO, CALL, VAL_UNI;
+
+
+
+/*------->>>>  Aquí van otras precedencias :D <<<<------- */
+
+
+start with INICIO; 
+
+INICIO          ::= CUERPO:id                                                   {:System.out.println("Fin C3D"); :};
+
+CUERPO          ::= METODOS                                                     {:  :};
+
+METODOS         ::= METODOS METODO                                              {:  :}
+                    |METODO                                                     {:  :};
+
+METODO          ::= tmethod tiden:id tpa tpc {: instruccionActual=0; :} tla INSTRUCCIONES:li tlc                 
+                    {: 
+                    Metodo met = new Metodo((String)id, (ArrayList<Instruccion>)li); 
+                    MetodosTS.TablaMetodos.put((String)id, met);
+                    :};
+
+INSTRUCCIONES   ::= INSTRUCCIONES:li INSTRUCCION:e                              {: ArrayList<Instruccion> lista = (ArrayList<Instruccion>)li;
+                                                                                if(e!=null){lista.add((Instruccion)e);}
+                                                                                RESULT = lista;
+                                                                                :}
+                    |INSTRUCCION:e                                              {:  ArrayList<Instruccion> lista = new ArrayList<>();
+                                                                                if(e!=null){lista.add((Instruccion)e);}
+                                                                                RESULT = lista;
+                                                                                :};
+
+INSTRUCCION     ::= ASIGNACION:e                                                {: instruccionActual++; RESULT = e; :}
+                    |CALL:e                                                     {: instruccionActual++; RESULT = e; :}
+                    |CALLF:e                                                    {: instruccionActual++; RESULT = e; :}
+                    |ETIQUETA:e                                                 {: instruccionActual++; RESULT = e; :}
+                    |IF:e                                                       {: instruccionActual++; RESULT = e; :}
+                    |GOTO:e                                                     {: instruccionActual++; RESULT = e; :};
+
+ASIGNACION      ::= tiden:id tigual EXPRESION:ex tpuntocoma                     {: Asignacion asig = new Asignacion(0, (String)id, (Instruccion)ex); RESULT = asig; :}
+                    |tstack tca tiden:id tcc tigual VAL_UNI:v1 tpuntocoma       {: Asignacion asig = new Asignacion(1, (String)id, (Instruccion)v1); RESULT = asig; :}
+                    |theap tca tiden:id tcc tigual VAL_UNI:v1 tpuntocoma        {: Asignacion asig = new Asignacion(2, (String)id, (Instruccion)v1); RESULT = asig; :}
+                    ;
+
+EXPRESION       ::= tstack tca tiden:id tcc                                     {: ValorStack valstack = new ValorStack((String)id); RESULT = valstack; :}
+                    |theap tca tiden:id tcc                                     {: ValorHeap valheap = new ValorHeap((String)id); RESULT = valheap; :}
+                    |VAL_UNI:v1                                                 {: RESULT = v1; :}
+                    |VAL_UNI:v1 OP_ARITMETICO:op VAL_UNI:v2                     {: Operacion oper = new Operacion((Instruccion)v1, (String)op, (Instruccion)v2); RESULT = oper; :}
+                    |tconca tpa tiden:id1 tcoma tiden:id2 tpc                   {: Concatenar conc = new Concatenar((String)id1, (String)id2); RESULT = conc; :}
+                    |tfloattoint tpa VAL_UNI:v1 tpc                             {: FloatToInt flo = new FloatToInt((Instruccion)v1); RESULT = flo; :}
+                    ;
+
+VAL_UNI         ::= tentero:e                                                   {: Numero num = new Numero((String)e); RESULT = num; :}
+                    |tdecimal:e                                                 {: Numero num = new Numero((String)e); RESULT = num; :}
+                    |tiden:e                                                    {: ValorVariable valVar = new ValorVariable((String)e); RESULT = valVar; :}
+                    |tmenos tentero:e                                           {: Numero num = new Numero("-"+(String)e); RESULT = num; :}
+                    |tmenos tdecimal:e                                          {: Numero num = new Numero("-"+(String)e); RESULT = num; :}
+                    ;
+
+CALL            ::= tcall tiden:id tpa tpc tpuntocoma                           {: Call cal = new Call((String)id); RESULT = cal; :};
+
+CALLF           ::= tcallf timprimir tpa tiden:id1 tcoma tentero:e1 tpc tpuntocoma     
+                    {: Imprimir imp = new Imprimir((String)id1, (String)e1); RESULT = imp; :}
+                    |tcallf tlinea tpa tiden:id1 tcoma tiden:id2 tcoma tiden:id3 tcoma tiden:id4 tcoma tiden:id5 tcoma tiden:id6 tcoma tiden:id7 tpc tpuntocoma                 
+                    {: Linea lin = new Linea((String)id1, (String)id2, (String)id3, (String)id4, (String)id5, (String)id6, (String)id7); RESULT = lin; :}
+                    |tcallf tarco  tpa tiden:id1 tcoma tiden:id2 tcoma tiden:id3 tcoma tiden:id4 tcoma tiden:id5 tcoma tiden:id6 tcoma tiden:id7 tcoma tiden:id8 tcoma tiden:id9 tcoma tiden:id10 tpc tpuntocoma                  
+                    {: Arco arc = new Arco((String)id1, (String)id2, (String)id3, (String)id4, (String)id5, (String)id6, (String)id7, (String)id8, (String)id9, (String)id10); RESULT = arc; :}
+                    |tcallf trectangulo tpa tiden:id1 tcoma tiden:id2 tcoma tiden:id3 tcoma tiden:id4 tcoma tiden:id5 tcoma tiden:id6 tcoma tiden:id7 tcoma tiden:id8 tpc tpuntocoma            
+                    {: Rectangulo rec = new Rectangulo((String)id1, (String)id2, (String)id3, (String)id4, (String)id5, (String)id6, (String)id7, (String)id8); RESULT = rec; :}
+                    |tcallf tovalo tpa tiden:id1 tcoma tiden:id2 tcoma tiden:id3 tcoma tiden:id4 tcoma tiden:id5 tcoma tiden:id6 tcoma tiden:id7 tcoma tiden:id8 tpc tpuntocoma                 
+                    {: Ovalo ova = new Ovalo((String)id1, (String)id2, (String)id3, (String)id4, (String)id5, (String)id6, (String)id7, (String)id8); RESULT = ova; :}
+                    |tcallf tpoligono tpa tiden:id1 tcoma tiden:id2 tcoma tiden:id3 tcoma tiden:id4 tcoma tiden:id5 tcoma tiden:id6 tpc tpuntocoma              
+                    {: Poligono pol = new Poligono((String)id1, (String)id2, (String)id3, (String)id4, (String)id5, (String)id6); RESULT = pol; :}
+                    |tcallf tlienzo tpa tiden:id1 tcoma tiden:id2 tcoma tiden:id3 tcoma tiden:id4 tcoma tiden:id5 tpc tpuntocoma                
+                    {: Lienzo lie = new Lienzo((String)id1, (String)id2, (String)id3, (String)id4, (String)id5); RESULT = lie; :}  
+                    |tcallf ttexto tpa tiden:id1 tcoma tiden:id2 tcoma tiden:id3 tcoma tiden:id4 tcoma tiden:id5 tcoma tiden:id6 tpc tpuntocoma                 
+                    {: Texto tex = new Texto((String)id1, (String)id2, (String)id3, (String)id4, (String)id5, (String)id6); RESULT = tex; :}
+                    ;
+
+ETIQUETA        ::= tiden:e tdospuntos                                          {: MetodosTS.saveEtiqueta((String)e, instruccionActual); RESULT = new Etiqueta(); :};
+
+IF              ::= tif VAL_UNI:v1 OP_COMPARADOR:op VAL_UNI:v2 tthen tgoto tiden:id tpuntocoma
+                    {: SentenciaIF sentIF = new SentenciaIF((Instruccion)v1, (String)op, (Instruccion)v2, (String)id); RESULT = sentIF; :};
+
+GOTO            ::= tgoto tiden:id tpuntocoma                                   {: Goto go = new Goto((String)id); RESULT = go; :};
+
+OP_ARITMETICO   ::= tmas                                                        {: RESULT = new String ("+"); :}
+                    |tmenos                                                     {: RESULT = new String ("-"); :}
+                    |tpor                                                       {: RESULT = new String ("*"); :}
+                    |tdividir                                                   {: RESULT = new String ("/"); :}
+                    |tpotencia                                                  {: RESULT = new String ("^"); :};
+
+OP_COMPARADOR   ::= tmenor                                                      {: RESULT = new String ("<"); :}
+                    |tmayor                                                     {: RESULT = new String (">"); :}
+                    |tmenorigual                                                {: RESULT = new String ("<="); :}
+                    |tmayorigual                                                {: RESULT = new String (">="); :}
+                    |tigualigual                                                {: RESULT = new String ("=="); :}
+                    |tdiferente                                                 {: RESULT = new String ("!="); :};
+

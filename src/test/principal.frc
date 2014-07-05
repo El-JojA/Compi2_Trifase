@@ -1,0 +1,88 @@
+
+#import <configuracion.frc>
+
+public class principal extends herencia {
+
+    private int nivel_de_recursividad = 6
+    public int r, g, b
+    public string titulo = "Triangulo de "
+	
+    public void main() {
+        configuracion c = new configuracion()
+        principal p = new principal()
+        p.print()
+        p.setCanvas(c)
+        p.r = 0
+        p.g = 0
+        p.b = 0
+        p.pintar()
+    }
+
+    public void print(){
+        imprimir("hola mundo!")
+    
+    }
+
+    public void pintar() {
+        
+            float xp12 = (float)xp1
+            float yp12 = (float)yp1
+            float xp22 = (float)xp2
+            float yp22 = (float)yp2
+            
+            for (int i = 0, i < nivel_de_recursividad, i++) {
+                float dx = (xp22 - xp12) / 2
+                float dy = (yp22 - yp12) / 2
+                float xp32 = xp12 + dx - 2 * dy * sin60
+                float yp32 = yp12 + dy + 2 * dx * sin60
+
+                float dx1 = (xp22 + xp12) / 2
+                float dy1 = (yp22 + yp12) / 2
+                float dx2 = (xp32 + xp22) / 2
+                float dy2 = (yp32 + yp22) / 2
+                float dx3 = (xp12 + xp32) / 2
+                float dy3 = (yp12 + yp32) / 2
+
+                if (i <= 0) {
+                    Linea((int) xp12, (int) yp12, (int) xp22, (int) yp22, r, g, b)
+                    Linea((int) xp22, (int) yp22, (int) xp32, (int) yp32, r, g, b)
+                    Linea((int) xp32, (int) yp32, (int) xp12, (int) yp12, r, g, b)
+                } else {
+                    paintRecursivo(i - 1, xp12, yp12, dx1, dy1)
+                    paintRecursivo(i - 1, dx1, dy1, xp22, yp22)
+                    paintRecursivo(i - 1, dx3, dy3, dx2, dy2)
+                }
+            }
+
+            Texto(titulo + "Sierpinski - " + "compi 2", 30, 30, 255, 0, 0)
+    }
+
+    private void paintRecursivo(int i, float xp12, float yp12, float xp22, float yp22) {
+        float dx = (xp22 - xp12) / 2
+        float dy = (yp22 - yp12) / 2
+        float xp32 = xp12 + dx - 2 * dy * sin60
+        float yp32 = yp12 + dy + 2 * dx * sin60
+
+        float dx1 = (xp22 + xp12) / 2
+        float dy1 = (yp22 + yp12) / 2
+        float dx2 = (xp32 + xp22) / 2
+        float dy2 = (yp32 + yp22) / 2
+        float dx3 = (xp12 + xp32) / 2
+        float dy3 = (yp12 + yp32) / 2
+
+        if (i <= 0) {
+            Linea((int) xp12, (int) yp12, (int) xp22, (int) yp22, r, g, b)
+            Linea((int) xp22, (int) yp22, (int) xp32, (int) yp32, r, g, b)
+            Linea((int) xp32, (int) yp32, (int) xp12, (int) yp12, r, g, b)
+        } else {
+            paintRecursivo(i - 1, xp12, yp12, dx1, dy1)
+            paintRecursivo(i - 1, dx1, dy1, xp22, yp22)
+            paintRecursivo(i - 1, dx3, dy3, dx2, dy2)
+        }
+    }
+
+    public void setCanvas(configuracion c) {
+        Lienzo(c.getAlto(), c.getAncho(), c.color[0], c.color[1], c.color[2])
+    }
+
+}

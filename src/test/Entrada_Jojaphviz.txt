@@ -1,0 +1,27 @@
+
+#import <archivo.frc>
+
+#import <archivo1.frc>
+
+public class clase1 extends hola{
+    
+    public int a =1, b, c= 2 
+    string adios
+    private bool lol
+
+    objeto obj = new objeto()
+
+    public void funcion(){
+        int a = 1
+        int x,y,z
+        funcion()
+        a = 2*5/funcion() + a++
+        this.b = (z>x) ? 1+2 : this.a + funcion()
+
+    }
+    
+    public void funcion(int hola, bool adios, &string lol){
+        
+    }
+
+}

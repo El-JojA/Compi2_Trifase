@@ -1,0 +1,102 @@
+package analisis; 
+import java_cup.runtime.*;
+import java.util.*;
+import acciones.proyectos.*;
+
+parser code
+
+{:
+    /**Metodo al que se llama automaticamente ante algun error sintáctico.*/
+    public void syntax_error(Symbol s)
+    {
+        //Metodos.addError("sintactico", (s.right+1), s.left, "Identificador \"" +s.value + "\" no reconocido por la gramatica");
+        System.out.println("Error sintactico en la Fila " + (s.right+1) +" Columna "+s.left+ ". Identificador \"" +s.value + "\" no reconocido." );
+    }
+
+    /**Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores.*/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    { 
+        //Metodos.addError("sintactico", (s.right+1), s.left, "Identificador \"" +s.value + "\" no reconocido por la gramatica");
+        System.out.println("Error sintactico en la Fila " + (s.right+1)+ " Columna "+s.left+". Identificador \"" + s.value + "\" no reconocido."); 
+    }
+
+   
+:}
+
+action code
+{:
+    boolean correcto = true;
+:}
+
+terminal tmenor, tiden, tmayor, tigual, tcadena, tslash;
+
+non terminal INICIO, CUERPO, OBJETO, OBJETOS, TAG_FINAL; 
+non terminal ATRIBUTOS, ATRIBUTO;
+
+/*------->>>>  Aquí van otras precedencias :D <<<<------- */
+
+
+start with INICIO; 
+
+INICIO          ::= CUERPO:e {: 
+                            System.out.println("Fin, " + correcto); 
+                            MetodosProyectos.objProyectos = (Objeto)e;
+                            MetodosProyectos.setCorrecto(correcto);
+                            :};
+
+CUERPO          ::= OBJETO:of {: RESULT = of; :};
+
+OBJETO          ::= tmenor tiden:ti ATRIBUTOS:a tslash tmayor
+                    {:
+                        RESULT = new Objeto((String)ti, (ArrayList<Instruccion>)a , null);
+                    :}
+                    |tmenor tiden:ti ATRIBUTOS:a tmayor OBJETOS:o TAG_FINAL:tf 
+                    {:  Object[] tagFinal =  (Object[]) tf;
+                        String tagInicial = (String)ti;
+                        if(((String)tagFinal[0]).equals(tagInicial))
+                        {
+                            RESULT = new Objeto((String)tagFinal[0], (ArrayList<Instruccion>)a, (ArrayList<Instruccion>)o );
+                        }
+                        else
+                        {
+                            correcto = false;
+                            MetodosProyectos.addError("Semantico",(int)tagFinal[1], (int)tagFinal[2], "Tag de finalización no concuerda. " + "<"+ (String)ti + ">" + " </" + (String)tagFinal[0] + ">" ); 
+                            RESULT = new Objeto((String)ti + "-error", null, null);
+                        }
+                    :};
+
+OBJETOS         ::= OBJETOS:os OBJETO:o
+                        {:
+                            if(os==null){ 
+                            ArrayList<Instruccion> lista = new ArrayList<>(); 
+                            lista.add((Instruccion)o); 
+                            RESULT = lista; }
+ 
+                            else { ArrayList<Instruccion> lista = new ArrayList<>(); 
+                            lista = (ArrayList<Instruccion>)os; 
+                            lista.add((Instruccion)o); 
+                            RESULT = lista;  }
+                        :}
+                    |
+                        {:
+                            RESULT = null;
+                        :};
+
+/**
+OBJETO2         ::= tslash tmayor
+                    |tmayor OBJETOS TAG_FINAL;
+**/
+TAG_FINAL       ::= tmenor tslash tiden:e tmayor
+                    {:  Object[] tagFinal = {e , (Object) (eright +1) , (Object)eleft };
+                        RESULT = tagFinal; 
+                    :};
+
+ATRIBUTOS       ::= ATRIBUTOS:l ATRIBUTO:e  
+                    {: 
+                        if(l==null){ ArrayList<Instruccion> lista = new ArrayList<>(); lista.add((Instruccion)e); RESULT = lista; } 
+                        else { ArrayList<Instruccion> lista = new ArrayList<>(); lista = (ArrayList<Instruccion>)l; lista.add((Instruccion)e); RESULT = lista;  }
+                    :}
+                    |{: RESULT = null; :};
+
+ATRIBUTO        ::= tiden:n tigual tcadena:v {: RESULT = new Atributo((String)n, (String)v); :};
+

@@ -1,0 +1,450 @@
+package analisis; 
+import java_cup.runtime.*;
+import java.util.*;
+import acciones.tablasimbolos.*;
+
+parser code
+
+{:
+    /**Metodo al que se llama automaticamente ante algun error sintáctico.*/
+    public void syntax_error(Symbol s)
+    {
+        //String inTipo, String inMensaje, String inAmbito, String inFila, String inColumna
+        MetodosTS.addError("Sintactico", "Error sintactico sin recuperacion (papalinas).", "ambito", String.valueOf(s.right+1), String.valueOf(s.left));
+        System.out.println("Error sintactico en la Fila " + (s.right+1) +" Columna "+s.left+ ". Identificador \"" +s.value + "\" no reconocido." );
+    }
+
+    /**Metodo al que se llama en el momento en que ya no es posible una recuperacion de errores.*/ 
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    { 
+        MetodosTS.addError("Sintactico", "Error sintactico sin recuperacion (papalinas).", "ambito", String.valueOf(s.right+1), String.valueOf(s.left));
+        System.out.println("Error sintactico en la Fila " + (s.right+1)+ " Columna "+s.left+". Identificador \"" + s.value + "\" no reconocido."); 
+    }
+
+:}
+
+action code
+{:
+
+    String claseActual="";
+    String constructorPorOmision="";
+    String contenidoInit="";
+    boolean existeConstructor = false;
+
+:}
+
+terminal timport, tiden, tpunto, tenter, tpublic, tprivate, tclass, tla, tlc;
+terminal tigual, tcoma, tint, tbool, tstring, tchar, tfloat, tvoid;
+terminal tmas, tmenos, tpor, tdividir, tpotencia, tpa, tpc, tentero, tdecimal;
+terminal tcadena, tcaracter, ttrue, tfalse,  tmasmas, tmenosmenos, tamp, tarray;
+terminal tmenor, tmayor, tthis, tca, tcc, textends, tif, telse, tor, tand;
+terminal tno, tmenorigual, tmayorigual, tigualigual, tdiferente, tfor, twhile;
+terminal tdo, tnew, tbreak, tcontinue, tswitch, tdefault, tcase, tdospuntos;
+terminal tmasigual, tmenosigual, tporigual, tdividirigual, treturn, tlinea;
+terminal ttexto, tarco, trectangulo, tovalo, tpoligono, tlienzo, timprimir;
+terminal tinterrogacion;
+
+
+non terminal INICIO, CUERPO, IMPORTS, DECLARA_CLASE, INSTRUCCIONES, MODIFICADOR;
+non terminal DECLARA_VAR, DECLARADOR_VAR, INICIA_VAR, TIPO, EXPRESION, EXPR;
+non terminal NUM, INCREMENTO, CASTEO, TIPO_PRIMI, DECLARA_VAR_LOCAL;
+non terminal LISTA_PARAMETROS2, INSTRUCCIONESLOW, DECLARA_METODO, LISTA_PARAMETROS;
+non terminal VARIABLE, ATRIBUTO, VECTOR, FUNCION, LISTA_ARGUMENTOS2, LISTA_ARGUMENTOS;
+non terminal EXTENDS, IF, ELSE, CONDICIONES, CONDICION, OP_COMPARADOR, ASIGNACION;
+non terminal FOR, WHILE, DOWHILE, NEW_ARRAY, NEW_OBJETO, SWITCH;
+non terminal CASES, DEFAULT, RETURN, OP_TERNARIO;
+non terminal LINEA, TEXTO, ARCO, RECTANGULO, OVALO, POLIGONO, LIENZO, IMPRIMIR;
+non terminal INSTRUCCIONLOW, ENTERS, DECLARA_CONSTRUCTOR, DECLARADOR_VAR2, INICIA_VAR2; 
+non terminal VARIABLE2,ARGUMENTOS_ARRAY, VECTOR2, FUNCION2;
+
+
+/*------->>>>  Aquí van otras precedencias :D <<<<------- */
+
+precedence left tor;
+precedence left tand;
+precedence left tno, tigualigual;
+precedence left tmenor, tmenorigual, tmayor, tmayorigual;
+
+precedence left tmas, tmenos;
+precedence left tpor, tdividir;
+precedence left tpotencia;
+
+start with INICIO; 
+
+INICIO          ::= CUERPO:id                                                   {: 
+                                                                                System.out.println("Fin " +(String)id);  
+                                                                                System.out.println(MetodosTS.SimboloActual.toString());
+                                                                                :};
+
+CUERPO          ::= IMPORTS DECLARA_CLASE:id                                    {: RESULT = id; :};
+
+IMPORTS         ::= IMPORTS timport tmenor tiden:id1 tpunto tiden:id2 tmayor tenter {: MetodosTS.importar2((String)id1, (String)id2); :}
+                    |IMPORTS tenter
+                    |;
+
+DECLARA_CLASE   ::= MODIFICADOR:mo tclass tiden:id 
+                    {: 
+                        claseActual = (String)id; 
+                    :} EXTENDS:ex tla INSTRUCCIONES tlc ENTERS 
+                    {: 
+                        String str = MetodosTS.crearInit((String)id, contenidoInit, existeConstructor);
+                        MetodosTS.InitsDeExtends.put((String)id, contenidoInit);
+                        MetodosTS.addTexto3d(str);
+                        RESULT = id; 
+                    :};
+
+ENTERS          ::= ENTERS tenter
+                    |;
+
+EXTENDS         ::= textends tiden:id                                           {: MetodosTS.heredar2((String)id); 
+                                                                                String extendsInit = MetodosTS.InitsDeExtends.get((String)id);
+                                                                                contenidoInit = contenidoInit + extendsInit;
+                                                                                :}
+                    |                                                           {: RESULT = null; :};
+
+MODIFICADOR     ::= tpublic                                                     {: RESULT = new String("public"); :}
+                    |tprivate                                                   {: RESULT = new String("private"); :}
+                    |                                                           {: RESULT = new String("private"); :};
+
+INSTRUCCIONES   ::= INSTRUCCIONES DECLARA_VAR:e tenter                          {: String[] str = (String[])e; contenidoInit = contenidoInit + str[0]; :}
+                    |INSTRUCCIONES DECLARA_METODO:e                             {: String str = (String)e; MetodosTS.addTexto3d(str); :}
+                    |INSTRUCCIONES DECLARA_CONSTRUCTOR:e                        {: existeConstructor = true; MetodosTS.addTexto3d((String)e); :}
+                    |INSTRUCCIONES tenter                                       {: :}
+                    |tenter                                                     ;
+
+DECLARA_VAR     ::= MODIFICADOR:mo  DECLARADOR_VAR2:li                          {: String[] str = (String[])li; RESULT = str; :};
+
+
+DECLARADOR_VAR2 ::= DECLARADOR_VAR2:li tcoma tiden:id INICIA_VAR2:e             {: String[] str1 = (String[])li; String[] str2 = MetodosTS.declaradorVar((String)id, (String[])e, null); str1[0] = str1[0] + str2[0]; RESULT = str1; :} 
+                    |TIPO:ti tiden:id INICIA_VAR2:e                             {: String[] str = MetodosTS.declaradorVar((String)id, (String[])e, (String)ti); RESULT = str; :};
+
+INICIA_VAR2     ::= tigual EXPRESION:e                                          {: RESULT = e; :}
+                    |                                                           {: RESULT = null; :};
+        
+/* Si podría usar DECLARA_VAR pero creo que podría dar ambigUedad */
+DECLARA_VAR_LOCAL::= DECLARADOR_VAR:li                                          {: String[] str = (String[])li; RESULT = str; :};
+
+DECLARADOR_VAR  ::= DECLARADOR_VAR:li tcoma tiden:id INICIA_VAR:e               {: String[] str1 = (String[])li; String[] str2 = MetodosTS.declaradorVar((String)id, (String[])e, null); str1[0] = str1[0] + str2[0]; RESULT = str1; :} 
+                    |TIPO:ti tiden:id INICIA_VAR:e                              {: String[] str = MetodosTS.declaradorVar((String)id, (String[])e, (String)ti); RESULT = str; :};
+
+INICIA_VAR      ::= tigual EXPRESION:e                                          {: RESULT = e; :}
+                    |                                                           {: RESULT = null; :};
+                    
+DECLARA_METODO  ::= MODIFICADOR:mo TIPO:ti tiden:id tpa LISTA_PARAMETROS:li tpc {: 
+                                                                                String nombreFuncion = claseActual + "_" + (String)id + (String)li; 
+                                                                                MetodosTS.setAmbito(nombreFuncion);
+                                                                                MetodosTS.setNewReturn();
+                                                                                :}  
+                                                                                tla INSTRUCCIONESLOW:in tlc 
+                                                                                {: 
+                                                                                MetodosTS.SimboloActual.pop();
+                                                                                String nombreFuncion = claseActual + "_" + (String)id + (String)li;
+                                                                                String metodo = MetodosTS.declaraMetodo(nombreFuncion, (String[])in);
+                                                                                MetodosTS.popReturn();
+                                                                                RESULT = metodo;
+                                                                                :};
+
+DECLARA_CONSTRUCTOR ::= MODIFICADOR:mo tiden:id tpa LISTA_PARAMETROS:li tpc tla {:
+                                                                                String nombreFuncion = claseActual + "_" + (String)id + (String)li; 
+                                                                                MetodosTS.setAmbito(nombreFuncion);
+                                                                                MetodosTS.setNewReturn();
+                                                                                :}
+                                                                                 INSTRUCCIONESLOW:in tlc
+                                                                                {:
+                                                                                String nombreFuncion = claseActual + "_" + (String)id + (String)li; 
+                                                                                String str = MetodosTS.crearConstructor(claseActual, nombreFuncion, (String[])in);
+                                                                                MetodosTS.SimboloActual.pop();
+                                                                                MetodosTS.popReturn();
+                                                                                RESULT = str;
+                                                                                :};
+
+RETURN          ::= treturn EXPRESION:e                                         {: String[] str = MetodosTS.sentenciaReturn((String[])e); RESULT = str; :};
+
+LISTA_PARAMETROS::= LISTA_PARAMETROS2:li                                        {: RESULT = li; :}
+                    |                                                           {: RESULT = new String(""); :};
+
+LISTA_PARAMETROS2::= LISTA_PARAMETROS2:li tcoma TIPO:ti tiden:id                {: String str = (String)li; RESULT = new String(str + "_" + (String)ti); :}
+                    |LISTA_PARAMETROS2:li tcoma tamp TIPO:ti tiden:id           {: String str = (String)li; RESULT = new String(str + "_" + (String)ti); :}
+                    |TIPO:ti tiden:id                                           {: RESULT = new String("_" + (String)ti); :}
+                    |tamp TIPO:ti tiden:id                                      {: RESULT = new String("_" + (String)ti); :};
+
+INSTRUCCIONESLOW::= INSTRUCCIONESLOW:in INSTRUCCIONLOW:e                        {: String[] str = MetodosTS.instruccioneslow((String[])in, (String[])e); RESULT = str; :}
+                    |tenter                                                     {: String[] str = {"","",""}; RESULT = str; :};
+
+INSTRUCCIONLOW  ::= DECLARA_VAR_LOCAL:e tenter                                  {: RESULT = e; :}
+                    |ASIGNACION:e tenter                                        {: RESULT = e; :}
+                    |VARIABLE:e tenter                                          {: RESULT = e; :}
+                    |LINEA:e tenter                                             {: RESULT = e; :}
+                    |TEXTO:e tenter                                             {: RESULT = e; :}
+                    |ARCO:e tenter                                              {: RESULT = e; :}
+                    |RECTANGULO:e tenter                                        {: RESULT = e; :}
+                    |OVALO:e tenter                                             {: RESULT = e; :}
+                    |POLIGONO:e tenter                                          {: RESULT = e; :}
+                    |LIENZO:e tenter                                            {: RESULT = e; :}
+                    |IMPRIMIR:e tenter                                          {: RESULT = e; :}
+                    |RETURN:e tenter                                            {: RESULT = e; :}
+                    |IF:e                                                       {: RESULT = e; :}
+                    |FOR:e                                                      {: RESULT = e; :}
+                    |WHILE:e                                                    {: RESULT = e; :}
+                    |SWITCH:e                                                   {: RESULT = e; :}
+                    |DOWHILE:e                                                  {: RESULT = e; :}
+                    |tbreak tenter                                              {: String[] str = MetodosTS.sentenciaBreak(); RESULT = str; :}
+                    |tcontinue tenter                                           {: String[] str = {"","",""}; RESULT = str; :}
+                    |tenter                                                     {: String[] str = {"","",""}; RESULT = str; :};
+
+ASIGNACION      ::= VARIABLE:va tigual:op EXPRESION:ex                          {: String[] str = MetodosTS.asignacion((String[])va, (String[])ex); RESULT = str; :}
+                    |VARIABLE:va tmasigual EXPRESION:ex                         
+                    |VARIABLE:va tmenosigual EXPRESION:ex                      
+                    |VARIABLE:va tporigual EXPRESION:ex                      
+                    |VARIABLE:va tdividirigual EXPRESION:ex                      
+                    |INCREMENTO:e                                               {: RESULT = e; :}
+                    |OP_TERNARIO:e                                              ;
+
+INCREMENTO      ::= VARIABLE:va tmasmas                                         {: String[] str = MetodosTS.incremento((String[])va, "+"); RESULT = str; :}
+                    |VARIABLE:va tmenosmenos                                    {: String[] str = MetodosTS.incremento((String[])va, "-"); RESULT = str; :}
+                    |tmasmas VARIABLE                                           
+                    |tmenosmenos VARIABLE                                       ;
+
+OP_TERNARIO     ::= tpa CONDICIONES:co tpc tinterrogacion EXPRESION:e1 tdospuntos EXPRESION:e2 {: String[] str = MetodosTS.opTernario((String[])co, (String[])e1, (String[])e2); RESULT = str; :};
+
+TIPO            ::= TIPO_PRIMI:e                                                {: RESULT = e; :}
+                    |tiden:e                                                    {: RESULT = e; :}
+                    |tstring                                                    {: RESULT = new String("string"); :}
+                    |tarray tmenor TIPO:tp tmayor                               {: RESULT = new String("array"); :};
+
+TIPO_PRIMI      ::= tint                                                        {: RESULT = new String("int"); :}
+                    |tbool                                                      {: RESULT = new String("boolean"); :}
+                    |tchar                                                      {: RESULT = new String("char"); :}
+                    |tfloat                                                     {: RESULT = new String("float"); :}
+                    |tvoid                                                      {: RESULT = new String("void"); :};                   
+
+EXPRESION       ::= EXPR:e                                                      {: RESULT = e; :};
+
+EXPR            ::= EXPR:e1 tmas EXPR:e2                                        {: String[] str = MetodosTS.exprSumaExpr((String[])e1, (String[])e2); RESULT = str; :}
+                    |EXPR:e1 tmenos EXPR:e2                                     {: String[] str = MetodosTS.exprOpExpr((String[])e1, "-",(String[])e2); RESULT = str;   :}
+                    |EXPR:e1 tpor EXPR:e2                                       {: String[] str = MetodosTS.exprOpExpr((String[])e1, "*",(String[])e2); RESULT = str;  :}
+                    |EXPR:e1 tdividir EXPR:e2                                   {: String[] str = MetodosTS.exprDividirExpr((String[])e1,(String[])e2); RESULT = str;  :}
+                    |EXPR:e1 tpotencia EXPR:e2                                  {: String[] str = MetodosTS.exprOpExpr((String[])e1, "^",(String[])e2); RESULT = str;  :} 
+                    |tpa EXPR:e tpc                                             {: RESULT = e; :} 
+                    |NUM:e                                                      {: RESULT = e; :};   
+                    
+NUM             ::= tentero:e                                                   {: String[] str = {"", (String)e, "int" }; RESULT = str;  :}  
+                    |tdecimal:e                                                 {: String[] str = {"", (String)e, "float" }; RESULT = str; :} 
+                    |tcadena:e                                                  {: String[] str = MetodosTS.stringToC3d((String)e); RESULT = str; :} 
+                    |tcaracter:e                                                {: String[] str = MetodosTS.charToC3d((String)e); RESULT = str; :}   
+                    |ttrue:e                                                    {: String[] str = {"", "1", "boolean" }; RESULT = str; :}   
+                    |tfalse:e                                                   {: String[] str = {"", "0", "boolean" }; RESULT = str; :}   
+                    |VARIABLE:e                                                 {: String[] str = MetodosTS.getValorVariable((String[])e); RESULT = str; :} 
+                    |CASTEO:e                                                   {: RESULT = e; :} 
+                    |INCREMENTO:e                                               {: RESULT = e; :}
+                    |NEW_ARRAY:e                                                {: RESULT = e; :}
+                    |NEW_OBJETO:e                                               {: RESULT = e; :}
+                    |OP_TERNARIO:e                                              {: RESULT = e; :};
+
+NEW_ARRAY       ::= tnew tarray tpa ARGUMENTOS_ARRAY:aa tpc                     {: String[] str = MetodosTS.newArray((String[])aa); RESULT = str; :};
+
+ARGUMENTOS_ARRAY::= ARGUMENTOS_ARRAY:aa tcoma EXPRESION:ex                      {: String[] str = MetodosTS.argumentosArray((String[])ex, (String[])aa); RESULT = str; :}
+                    |EXPRESION:ex                                               {: String[] str = MetodosTS.argumentosArray((String[])ex, null); RESULT = str; :};
+
+NEW_OBJETO      ::= tnew tiden:id tpa LISTA_ARGUMENTOS:li tpc                   {: String[] str = MetodosTS.newObjeto((String)id, (ArrayList<String[]>)li); RESULT = str; :};
+
+VARIABLE        ::=tthis:id {: MetodosTS.setAmbitoPadre(); :} ATRIBUTO:at       {: 
+                                                                                String[] str = MetodosTS.objetoAtributo((String)id, (String[])at);
+                                                                                MetodosTS.SimboloActual.pop();
+                                                                                RESULT = str;
+                                                                                :}
+                   |tiden:id 
+                    {: MetodosTS.setObjetoAsAmbito((String)id); :} ATRIBUTO:at  {:
+                                                                                String[] str = MetodosTS.objetoAtributo((String)id, (String[])at);
+                                                                                MetodosTS.SimboloActual.pop();
+                                                                                RESULT = str;
+                                                                                :}                          
+                   |VECTOR:e                                                    {: RESULT = e; :}
+                   |FUNCION:e                                                   {: RESULT = e; :}
+                   |tiden:e                                                     {: String[] str = MetodosTS.variable((String)e); RESULT = str; :};
+
+ATRIBUTO        ::= tpunto VARIABLE2:e                                          {: RESULT = e; :};
+
+VARIABLE2       ::= tiden:id 
+                {: MetodosTS.setObjetoAsAmbito((String)id); :} ATRIBUTO:at      {: String[] str = MetodosTS.objetoAtributo((String)id, (String[])at); 
+                                                                                MetodosTS.SimboloActual.pop();
+                                                                                RESULT = str; :}
+                   |VECTOR2:e                                                   {: RESULT = e; :}
+                   |FUNCION2:e                                                  {: RESULT = e; :}
+                   |tiden:e                                                     {: String[] str = MetodosTS.variable2((String)e); RESULT = str; :};
+                    
+FUNCION         ::= tiden:id tpa LISTA_ARGUMENTOS:li tpc                        {: String[] str = MetodosTS.sentenciaFuncion(claseActual, (String)id, (ArrayList<String[]>)li); RESULT = str; :};
+
+FUNCION2        ::= tiden:id tpa LISTA_ARGUMENTOS:li tpc                        {: String[] str = MetodosTS.sentenciaFuncion2(claseActual, (String)id, (ArrayList<String[]>)li); RESULT = str; :};
+
+CASTEO          ::= tpa TIPO_PRIMI:ti tpc EXPRESION:ex                          {: String[] str = MetodosTS.casteo((String)ti, (String[])ex); RESULT = str; :};
+
+LISTA_ARGUMENTOS::= LISTA_ARGUMENTOS2:e                                         {: RESULT = e; :}
+                    |                                                           {: ArrayList<String[]> lista = new ArrayList<>(); RESULT = lista;:};
+
+LISTA_ARGUMENTOS2::= LISTA_ARGUMENTOS2:li tcoma EXPRESION:ex                    {: ArrayList<String[]> lista = (ArrayList<String[]>)li; String[] str = (String[])ex; lista.add(str); RESULT = lista; :}
+                    |EXPRESION:e                                                {: ArrayList<String[]> lista = new ArrayList<>(); String[] str = (String[])e; lista.add(str); RESULT = lista; :};
+
+VECTOR          ::= VECTOR:ve tca EXPRESION:ex tcc                              {: String[] str = MetodosTS.getVector(null, (String[])ex, (String[])ve); RESULT = str; :}
+                    |tiden:id tca EXPRESION:ex tcc                              {: String[] str = MetodosTS.getVector((String)id, (String[])ex, null); RESULT = str; :};
+
+VECTOR2          ::= VECTOR2:ve tca EXPRESION:ex tcc                            {: String[] str = MetodosTS.getVector2(null, (String[])ex, (String[])ve); RESULT = str; :}
+                    |tiden:id tca EXPRESION:ex tcc                              {: String[] str = MetodosTS.getVector2((String)id, (String[])ex, null); RESULT = str; :};
+
+/** INSTRUCCION-LOW  -  CICLOS  **/
+
+FOR             ::=  tfor tpa ASIGNACION:as1 tcoma CONDICIONES:co tcoma ASIGNACION:as2 tpc tla 
+                    {: 
+                    MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek()));
+                    MetodosTS.setNewBreak();
+                    :} INSTRUCCIONESLOW:in tlc 
+                    {: MetodosTS.SimboloActual.pop(); 
+                    String[] str = MetodosTS.sentenciaFor((String[])as1, (String[])co, (String[])in, (String[])as2);
+                    MetodosTS.popBreak();
+                    RESULT = str;
+                    :}
+                    
+                    |tfor tpa TIPO tiden:id tigual EXPRESION:ex tcoma CONDICIONES:co tcoma ASIGNACION:as tpc tla 
+                    {: 
+                    MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek()));
+                    MetodosTS.setNewBreak();
+                    :} INSTRUCCIONESLOW:in tlc 
+                    {: 
+                    MetodosTS.SimboloActual.pop();
+                    String[] asig = MetodosTS.declaradorVar((String)id, (String[])ex, null);
+                    String[] str = MetodosTS.sentenciaFor(asig, (String[])co, (String[])in, (String[])as);
+                    MetodosTS.popBreak();
+                    RESULT = str;
+                    :};
+
+WHILE           ::= twhile tpa CONDICIONES:co tpc tla 
+                    {: 
+                    MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek()));
+                    MetodosTS.setNewBreak();
+                    :} INSTRUCCIONESLOW:in tlc 
+                    {: MetodosTS.SimboloActual.pop(); 
+                    String[] str = MetodosTS.sentenciaWhile((String[])co, (String[])in);
+                    MetodosTS.popBreak();
+                    RESULT = str;
+                    :};
+
+DOWHILE         ::= tdo tla 
+                    {: 
+                    MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek()));
+                    MetodosTS.setNewBreak();
+                    :} INSTRUCCIONESLOW:in tlc 
+                    {: MetodosTS.SimboloActual.pop(); :} twhile tpa CONDICIONES:co tpc
+                    {:
+                    
+                    String[] str = MetodosTS.sentenciaDoWhile((String[])in, (String[])co);
+                    MetodosTS.popBreak();
+                    RESULT = str;
+                    :};
+
+SWITCH          ::= tswitch CASES:ca DEFAULT:de tlc                                     {:  
+                                                                                String[] str = MetodosTS.sentenciaSwitch((String[])ca, (String[])de);
+                                                                                MetodosTS.popBreak();
+                                                                                RESULT = str;
+                                                                                :};
+
+CASES           ::= CASES:ca tcase EXPRESION:ex tdospuntos  
+                    {: 
+                    MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek()));
+                    :} INSTRUCCIONESLOW:in 
+                    {: 
+                    MetodosTS.SimboloActual.pop(); 
+                    String[] str = MetodosTS.sentenciaCase((String[])ca, (String[])ex,(String[])in);
+                    RESULT = str;
+                    :}
+                    
+                    |tpa VARIABLE:va tpc tla tenter tcase EXPRESION:ex tdospuntos  
+                    {: 
+                    MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek()));
+                    MetodosTS.setNewBreak();
+                    :} INSTRUCCIONESLOW:in 
+                    {: 
+                    MetodosTS.SimboloActual.pop(); 
+                    String[] str = MetodosTS.sentenciaCase((String[])va, (String[])ex,(String[])in);
+                    RESULT = str;
+                    :};
+
+DEFAULT         ::= tdefault tdospuntos  
+                    {: 
+                    MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek()));
+                    :} INSTRUCCIONESLOW:in tenter 
+                    {: 
+                    MetodosTS.SimboloActual.pop(); 
+                    RESULT = in;
+                    :}
+                    |{: String[] str = {"","",""}; :};
+
+IF              ::= tif tpa CONDICIONES:co tpc tla 
+                    {: 
+                    MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek())); 
+                    :} INSTRUCCIONESLOW:in tlc 
+                    {: 
+                    MetodosTS.SimboloActual.pop(); 
+                    :} ELSE:el
+                    {:
+                    String[] str = MetodosTS.sentenciaIf((String[])co, (String[])in, (String[])el);
+                    String cod = str[0];
+                    RESULT = str;
+                    :};
+
+ELSE            ::= telse tla {: MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek())); //asdzxc :} INSTRUCCIONESLOW:in tlc 
+                    {: 
+                    MetodosTS.SimboloActual.pop(); //zxxczc
+                    String[] str = MetodosTS.sentenciaElse((String[])in);
+                    RESULT = str;
+                    :}
+                    |telse tif tpa CONDICIONES:co tpc tla{: MetodosTS.SimboloActual.push(MetodosTS.getSiguienteAmbito(MetodosTS.SimboloActual.peek()));  :} INSTRUCCIONESLOW:in tlc 
+                    {: 
+                    MetodosTS.SimboloActual.pop(); 
+                    :} ELSE:el
+                    {:
+                    String[] str = MetodosTS.sentenciaIf((String[])co, (String[])in, (String[])el);
+                    RESULT = str;
+                    :}                    
+                    |{: String lb = MetodosTS.getNewEtiqueta(); 
+                        String[] str = {lb + ":\n", lb ,""}; 
+                    RESULT = str; :};
+
+CONDICIONES     ::= CONDICIONES:e1 tor CONDICIONES:e2                           {: String[] str = MetodosTS.condiciones((String[])e1, "or", (String[])e2); RESULT = str; :}
+                    |CONDICIONES:e1 tand CONDICIONES:e2                         {: String[] str = MetodosTS.condiciones((String[])e1, "and", (String[])e2); RESULT = str; :}
+                    |tno CONDICIONES:e1                                         {: String[] str = MetodosTS.condiciones((String[])e1, "not", null); RESULT = str; :}
+                    |tpa CONDICIONES:e tpc                                      {: RESULT = e; :}
+                    |CONDICION:e                                                {: RESULT = e; :};
+
+CONDICION       ::= EXPRESION:e1 OP_COMPARADOR:op EXPRESION:e2                  {: 
+                                                                                String[] str = MetodosTS.condicion((String[])e1, (String)op, (String[])e2);  
+                                                                                RESULT = str;
+                                                                                :};
+
+
+OP_COMPARADOR   ::= tmenor                                                      {: RESULT = new String ("<"); :}
+                    |tmayor                                                     {: RESULT = new String (">"); :}
+                    |tmenorigual                                                {: RESULT = new String ("<="); :}
+                    |tmayorigual                                                {: RESULT = new String (">="); :}
+                    |tigualigual                                                {: RESULT = new String ("=="); :}
+                    |tdiferente                                                 {: RESULT = new String ("!="); :};
+
+/** FUNCIONES ESPECIALES **/
+
+LINEA           ::= tlinea tpa LISTA_ARGUMENTOS:li tpc                          {: String[] str = MetodosTS.funcionEspecial("linea", (ArrayList<String[]>)li); RESULT = str; :};
+
+TEXTO           ::= ttexto tpa LISTA_ARGUMENTOS:li tpc                          {: String[] str = MetodosTS.funcionEspecial("texto", (ArrayList<String[]>)li); RESULT = str; :};
+
+ARCO            ::= tarco tpa LISTA_ARGUMENTOS:li tpc                           {: String[] str = MetodosTS.funcionEspecial("arco", (ArrayList<String[]>)li); RESULT = str; :};
+
+RECTANGULO      ::= trectangulo tpa LISTA_ARGUMENTOS:li tpc                     {: String[] str = MetodosTS.funcionEspecial("rectangulo", (ArrayList<String[]>)li); RESULT = str; :};
+
+OVALO           ::= tovalo tpa LISTA_ARGUMENTOS:li tpc                          {: String[] str = MetodosTS.funcionEspecial("ovalo", (ArrayList<String[]>)li); RESULT = str; :};
+
+POLIGONO        ::= tpoligono tpa LISTA_ARGUMENTOS:li tpc                       {: String[] str = MetodosTS.funcionEspecial("poligono", (ArrayList<String[]>)li); RESULT = str; :};
+
+LIENZO          ::= tlienzo tpa LISTA_ARGUMENTOS:li tpc                         {: String[] str = MetodosTS.funcionEspecial("lienzo", (ArrayList<String[]>)li); RESULT = str; :};
+
+IMPRIMIR        ::= timprimir tpa LISTA_ARGUMENTOS:li tpc                       {: String[] str = MetodosTS.funcionEspecial("imprimir", (ArrayList<String[]>)li); RESULT = str; :};
+
+
+
