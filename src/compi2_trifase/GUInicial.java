@@ -18,8 +18,10 @@ import analisis.JojaphvizLex;
 import analisis.ProyectosCup;
 import analisis.ProyectosLex;
 import java.awt.Color;
+import java.awt.Shape;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Line2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -59,7 +61,7 @@ public class GUInicial extends javax.swing.JFrame {
     DefaultTreeModel raizModel = new DefaultTreeModel(raizNode);
     JTree jTreeProyectos = new JTree(raizModel);
     
-    
+    Exito imagenFinal;
     
     
     public GUInicial() {
@@ -97,8 +99,7 @@ public class GUInicial extends javax.swing.JFrame {
 
         jFileChooserProyectos = new javax.swing.JFileChooser();
         jTabbedPaneEditor = new javax.swing.JTabbedPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextPaneStart = new javax.swing.JTextPane();
+        jScrollPaneStart = new javax.swing.JScrollPane();
         jScrollPane3 = new javax.swing.JScrollPane();
         jEditorPaneConsola = new javax.swing.JEditorPane();
         jScrollPaneTree = new javax.swing.JScrollPane();
@@ -124,17 +125,13 @@ public class GUInicial extends javax.swing.JFrame {
         jMenuTest = new javax.swing.JMenu();
         jMenuItemCompilarColor = new javax.swing.JMenuItem();
         jMenuItemTestGo = new javax.swing.JMenuItem();
-        jMenuItemTestGo2 = new javax.swing.JMenuItem();
 
         jFileChooserProyectos.setDialogTitle("Abrir proyecto...");
         jFileChooserProyectos.setFileFilter(new MiFiltro());
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jTextPaneStart.setText("public class prueba{\n\t\n    array<int> test = new Array(2,3)\n    int atr1 = 1\n    char atr2 = 'c'\n    \n    public void fun1(){\n        int a = 1\n        int b = 2\n        int r = a * b\n\n    }\n\n    public void main(){\n        prueba pru = new prueba()\n        pru.fun1()\n        \n    }\n\n}\n\n");
-        jScrollPane1.setViewportView(jTextPaneStart);
-
-        jTabbedPaneEditor.addTab("Start", jScrollPane1);
+        jTabbedPaneEditor.addTab("Start", jScrollPaneStart);
 
         jScrollPane3.setViewportView(jEditorPaneConsola);
 
@@ -259,14 +256,6 @@ public class GUInicial extends javax.swing.JFrame {
         });
         jMenuTest.add(jMenuItemTestGo);
 
-        jMenuItemTestGo2.setText("Go2");
-        jMenuItemTestGo2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemTestGo2ActionPerformed(evt);
-            }
-        });
-        jMenuTest.add(jMenuItemTestGo2);
-
         jMenuBarPrincipal.add(jMenuTest);
 
         setJMenuBar(jMenuBarPrincipal);
@@ -338,8 +327,13 @@ public class GUInicial extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuTestActionPerformed
 
     private void jMenuItemTestGoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemTestGoActionPerformed
-        Metodos.clearAll();
-        compiTest();
+        
+        imagenFinal = MetodosTS.imagenExito;
+        imagenFinal.setListaColors(MetodosTS.ListaColores);
+        imagenFinal.setListaShapes(MetodosTS.listaShapes);
+        imagenFinal.repaint();
+        
+        this.jScrollPaneStart.setViewportView(imagenFinal);
         
     }//GEN-LAST:event_jMenuItemTestGoActionPerformed
     
@@ -385,10 +379,6 @@ public class GUInicial extends javax.swing.JFrame {
         
     }//GEN-LAST:event_jMenuItemErroresGenerarActionPerformed
 
-    private void jMenuItemTestGo2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemTestGo2ActionPerformed
-        MetodosTS.ejecutarCodigoIntermedio();
-    }//GEN-LAST:event_jMenuItemTestGo2ActionPerformed
-
     private void jMenuItemCompilarGenCodActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCompilarGenCodActionPerformed
         genCodigoTresDirecciones();
         
@@ -416,7 +406,7 @@ public class GUInicial extends javax.swing.JFrame {
     
     public void ejecutarCodigoTresDirecciones(){
         this.compilar(MetodosTS.texto3d, "c3d");
-        //MetodosTS.ejecutarCodigoIntermedio();
+        MetodosTS.ejecutarCodigoIntermedio();
     }
     
     public void genCodigoTresDirecciones(){
@@ -440,11 +430,7 @@ public class GUInicial extends javax.swing.JFrame {
     
     public void compiTest2(){
     
-        MetodosTS.cargarTiposPrimitivos();
-        String texto = this.jTextPaneStart.getText();
-        this.compilar(texto, "joja");
-        //MetodosTS.putPrincipalAsTipo();
-        this.compilar(texto, "joja2");
+        
         
     }
     
@@ -490,11 +476,7 @@ public class GUInicial extends javax.swing.JFrame {
     
     public void test() throws BadLocationException{
         
-        compilarColores(this.jTextPaneStart);
-        /**
-        JScrollPane sp = getNewTab("hola");
-        jTabbedPaneEditor.addTab("Titulo",null, sp,"Something");
-         **/
+   
         
     }
     
@@ -899,13 +881,11 @@ public class GUInicial extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItemNuevoArchivo;
     private javax.swing.JMenuItem jMenuItemNuevoProyecto;
     private javax.swing.JMenuItem jMenuItemTestGo;
-    private javax.swing.JMenuItem jMenuItemTestGo2;
     private javax.swing.JMenu jMenuTest;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPaneStart;
     private javax.swing.JScrollPane jScrollPaneTree;
     private javax.swing.JTabbedPane jTabbedPaneEditor;
-    private javax.swing.JTextPane jTextPaneStart;
     private javax.swing.JTree jTree1;
     // End of variables declaration//GEN-END:variables
 }

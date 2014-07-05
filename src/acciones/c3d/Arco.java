@@ -6,6 +6,9 @@
 
 package acciones.c3d;
 
+import acciones.tablasimbolos.MetodosTS;
+import java.awt.geom.Arc2D;
+
 /**
  *
  * @author joja
@@ -38,6 +41,21 @@ public class Arco extends Instruccion {
 
     @Override
     public void operar() {
+        
+        int iX,iY, iAlto, iAncho, iAng, iGrados, iR,iG, iB, iFill;
+        iX =  Math.round(MetodosTS.TablaVariables.get(x));
+        iY =  Math.round(MetodosTS.TablaVariables.get(y));
+        iAlto = Math.round(MetodosTS.TablaVariables.get(alto));
+        iAncho = Math.round(MetodosTS.TablaVariables.get(ancho));
+        iAng = Math.round(MetodosTS.TablaVariables.get(angInit));
+        iGrados =  Math.round(MetodosTS.TablaVariables.get(grados));
+        iR = Math.round(MetodosTS.TablaVariables.get(r));
+        iG = Math.round(MetodosTS.TablaVariables.get(g));
+        iB = Math.round(MetodosTS.TablaVariables.get(b));
+        iFill =  Math.round(MetodosTS.TablaVariables.get(fill));
+        
+        
+        
         System.out.println("Ejecuta Archo");
     }
     

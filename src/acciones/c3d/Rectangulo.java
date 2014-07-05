@@ -6,6 +6,10 @@
 
 package acciones.c3d;
 
+import acciones.tablasimbolos.MetodosTS;
+import java.awt.Color;
+import java.awt.geom.Rectangle2D;
+
 /**
  *
  * @author joja
@@ -34,7 +38,23 @@ public class Rectangulo extends Instruccion {
     
     @Override
     public void operar() {
-        System.out.println("Ejecuta Rectangulo."); //To change body of generated methods, choose Tools | Templates.
+        
+        int iX,iY, iAlto, iAncho, iAng, iGrados, iR,iG, iB, iFill;
+        iX =  Math.round(MetodosTS.TablaVariables.get(x));
+        iY =  Math.round(MetodosTS.TablaVariables.get(y));
+        iAlto = Math.round(MetodosTS.TablaVariables.get(alto));
+        iAncho = Math.round(MetodosTS.TablaVariables.get(ancho));;
+        iR = Math.round(MetodosTS.TablaVariables.get(r));
+        iG = Math.round(MetodosTS.TablaVariables.get(g));
+        iB = Math.round(MetodosTS.TablaVariables.get(b));
+        iFill =  Math.round(MetodosTS.TablaVariables.get(fill));
+        
+        Rectangle2D rec = new Rectangle2D.Double(iX, iY, iAncho, iAlto);
+        Color color = new Color(iR, iG, iB);
+        
+        MetodosTS.listaShapes.add(rec);
+        MetodosTS.ListaColores.add(color);
+        
     }
     
     

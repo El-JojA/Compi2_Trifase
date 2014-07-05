@@ -55,6 +55,7 @@ public class principal extends herencia {
             }
 
             Texto(titulo + "Sierpinski - " + "compi 2", 30, 30, 255, 0, 0)
+            imprimir(titulo + "Sierpinski - " + "compi 2")
     }
 
     private void paintRecursivo(int i, float xp12, float yp12, float xp22, float yp22) {

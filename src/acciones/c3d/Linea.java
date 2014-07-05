@@ -7,6 +7,8 @@
 package acciones.c3d;
 
 import acciones.tablasimbolos.MetodosTS;
+import java.awt.Color;
+import java.awt.geom.Line2D;
 
 /**
  *
@@ -34,14 +36,21 @@ public class Linea extends Instruccion {
     
     @Override
     public void operar() {
-        float fx1, fx2, fy1,fy2, fr,fg,fb;
-        fx1 = MetodosTS.TablaVariables.get(x1);
-        fx2 = MetodosTS.TablaVariables.get(x2);
-        fy1 = MetodosTS.TablaVariables.get(y1);
-        fy2 = MetodosTS.TablaVariables.get(y2);
-        fr = MetodosTS.TablaVariables.get(r);
-        fg = MetodosTS.TablaVariables.get(g);
-        fb = MetodosTS.TablaVariables.get(b);
+        int fx1, fx2, fy1,fy2, fr,fg,fb;
+        fx1 = Math.round(MetodosTS.TablaVariables.get(x1));
+        fx2 = Math.round(MetodosTS.TablaVariables.get(x2));
+        fy1 = Math.round(MetodosTS.TablaVariables.get(y1));
+        fy2 = Math.round(MetodosTS.TablaVariables.get(y2));
+        
+        fr = Math.round(MetodosTS.TablaVariables.get(r));
+        fg = Math.round(MetodosTS.TablaVariables.get(g));
+        fb = Math.round(MetodosTS.TablaVariables.get(b));
+        
+        Line2D lin = new Line2D.Float(fx1, fy1, fx2, fy2);
+        Color color = new Color(fr, fg, fb);
+        
+        MetodosTS.listaShapes.add(lin);
+        MetodosTS.ListaColores.add(color);
         
         System.out.println("Ejecuta Linea("+ fx1 + "," + fx2 + "," + fy1+ "," + fy2+ "," + fr+ "," + fg+ "," + fb +")");
         

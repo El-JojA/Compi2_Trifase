@@ -155,14 +155,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemTestGoActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemTestGo2">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Go2"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemTestGo2ActionPerformed"/>
-              </Events>
-            </MenuItem>
           </SubComponents>
         </Menu>
       </SubComponents>
@@ -217,10 +209,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
       <SubComponents>
-        <Container class="javax.swing.JScrollPane" name="jScrollPane1">
-          <AuxValues>
-            <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-          </AuxValues>
+        <Container class="javax.swing.JScrollPane" name="jScrollPaneStart">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
               <JTabbedPaneConstraints tabName="Start">
@@ -230,13 +219,6 @@
           </Constraints>
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
-          <SubComponents>
-            <Component class="javax.swing.JTextPane" name="jTextPaneStart">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="public class prueba{&#xa;&#x9;&#xa;    array&lt;int&gt; test = new Array(2,3)&#xa;    int atr1 = 1&#xa;    char atr2 = &apos;c&apos;&#xa;    &#xa;    public void fun1(){&#xa;        int a = 1&#xa;        int b = 2&#xa;        int r = a * b&#xa;&#xa;    }&#xa;&#xa;    public void main(){&#xa;        prueba pru = new prueba()&#xa;        pru.fun1()&#xa;        &#xa;    }&#xa;&#xa;}&#xa;&#xa;"/>
-              </Properties>
-            </Component>
-          </SubComponents>
         </Container>
       </SubComponents>
     </Container>

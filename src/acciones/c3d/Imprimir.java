@@ -6,6 +6,8 @@
 
 package acciones.c3d;
 
+import acciones.tablasimbolos.MetodosTS;
+
 /**
  *
  * @author joja
@@ -23,6 +25,46 @@ public class Imprimir extends Instruccion {
     @Override
     public void operar() {
         
+        float pI = MetodosTS.TablaVariables.get(puntero);
+        int ptInicial = Math.round(pI);
+        
+        float letraActual = MetodosTS.heap[ptInicial];
+        
+        
+        String resultado="";
+        
+        if(tipoDato.equalsIgnoreCase("0"))
+        {
+            int contador = 0;
+            while(letraActual!=-1.0f && contador<500)
+            {
+                int letraActualInt = Math.round(letraActual);
+                resultado = resultado + Character.toString((char)letraActualInt);
+
+                ptInicial++;
+                contador++;
+                letraActual = MetodosTS.heap[ptInicial];
+            }
+        }
+        else if(tipoDato.equalsIgnoreCase("1"))
+        {
+            resultado = String.valueOf(Math.round(letraActual));
+        }
+        else if(tipoDato.equalsIgnoreCase("2"))
+        {
+            resultado = String.valueOf((letraActual));
+        }
+        else if(tipoDato.equalsIgnoreCase("3"))
+        {
+            int letraActualInt = Math.round(letraActual);
+            resultado = resultado + Character.toString((char)letraActualInt);
+        }
+        else if(tipoDato.equalsIgnoreCase("4"))
+        {
+            if(letraActual==0){resultado = "false";}
+            else{resultado="true";}
+        }
+        System.out.print("imprimir>>> " + resultado);
     }
     
     

@@ -11,10 +11,14 @@ import acciones.jojaphviz.Metodos;
 import analisis.JojaphvizCup;
 import analisis.JojaphvizCup2;
 import analisis.JojaphvizLex;
+import compi2_trifase.Exito;
+import java.awt.Color;
+import java.awt.Shape;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
+
 
 /**
  *
@@ -50,7 +54,11 @@ public class MetodosTS {
     public static Float[] heap = new Float[1500000];
     public static Float[] stack = new Float[15000];
     public static Stack<Integer> indiceInstruccion = new Stack<>(); 
-
+    
+    public static Exito imagenExito;
+    public static ArrayList<Shape> listaShapes = new ArrayList<>();
+    public static ArrayList<Color> ListaColores = new ArrayList<>();
+    public static ArrayList<String> ListaTexto = new ArrayList<>();
     
     public static void MetodosTS(){
         
@@ -2640,6 +2648,11 @@ public class MetodosTS {
             stack[i]=-1337f;
         }
     }
+    
+    public static void setLienzo(int ancho, int alto, int r, int g, int b){
+        imagenExito = new Exito(ancho, alto, r, g, b);
+    }
+    
     
     
 }

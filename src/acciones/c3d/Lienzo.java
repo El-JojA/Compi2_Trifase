@@ -6,6 +6,8 @@
 
 package acciones.c3d;
 
+import acciones.tablasimbolos.MetodosTS;
+
 /**
  *
  * @author joja
@@ -28,6 +30,17 @@ public class Lienzo extends Instruccion {
 
     @Override
     public void operar() {
+        
+        int iAlto, iAncho, iR,iG, iB;
+        iAlto = Math.round(MetodosTS.TablaVariables.get(alto));
+        iAncho = Math.round(MetodosTS.TablaVariables.get(ancho));
+        iR = Math.round(MetodosTS.TablaVariables.get(r));
+        iG = Math.round(MetodosTS.TablaVariables.get(g));
+        iB = Math.round(MetodosTS.TablaVariables.get(b));
+        
+        MetodosTS.setLienzo(iAncho, iAlto, iR, iG, iB);
+
+        //setLienzo
         System.out.println("Ejecuta Lienzo"); //To change body of generated methods, choose Tools | Templates.
     }
     
