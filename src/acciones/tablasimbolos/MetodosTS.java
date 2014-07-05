@@ -14,10 +14,14 @@ import analisis.JojaphvizLex;
 import compi2_trifase.Exito;
 import java.awt.Color;
 import java.awt.Shape;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -58,7 +62,8 @@ public class MetodosTS {
     public static Exito imagenExito;
     public static ArrayList<Shape> listaShapes = new ArrayList<>();
     public static ArrayList<Color> ListaColores = new ArrayList<>();
-    public static ArrayList<String> ListaTexto = new ArrayList<>();
+    public static ArrayList<FunTexto> ListaTexto = new ArrayList<>();
+    public static ArrayList<Integer> ListaFill = new ArrayList<>();
     
     public static void MetodosTS(){
         
@@ -2399,7 +2404,7 @@ public class MetodosTS {
                     + t1 + " = " + val + ";\n"
                     ;
             if(listaArgs.length()>0)
-            {listaArgs = listaArgs + "," + t1;}
+            {listaArgs = listaArgs + "," + t1 ;}
             else{listaArgs = t1;}
             
             if(listaTipos.length()>0)
@@ -2653,6 +2658,46 @@ public class MetodosTS {
         imagenExito = new Exito(ancho, alto, r, g, b);
     }
     
+    public static void makeErrores(){
     
+        String html = "\n <html>" + 
+                    "\n <body bgcolor=\"#BFFF00\"> "+
+                    "\n <center>" +
+                    "\n <h1>Errores de compilacion.</h1>" +
+                    "\n"+
+                    "\n <table border=\"1\">" +
+                    "\n <tr>" +
+                    "\n <td><b>Tipo</b></td>" +
+                    "\n <td><b>Mensaje</b></td>" +
+                    "\n <td><b>Ambito</b></td>" +
+                    "\n <td><b>Fila</b></td>" +
+                    "\n <td><b>Columna</b></td>" +
+                    "\n </tr>";
+        
+        for(int i = 0; i< ListaErrores.size();i++)
+        {
+            html = html +
+                    "\n <tr>" +
+                    "\n <td>" + ListaErrores.get(i).tipo + "</td>" +
+                    "\n <td> " + ListaErrores.get(i).mensaje +"</td>" +
+                    "\n <td>" + ListaErrores.get(i).ambito + "</td>" +
+                    "\n <td>" + ListaErrores.get(i).fila + "</td>" +
+                    "\n <td>" + ListaErrores.get(i).columna + "</td>" +
+                    "\n </tr>";
+        }
+        html = html + "\n </table>" +
+                    "\n </center>"+
+                    "\n </body>"+
+                    "\n </html>";
+        
+        String rutaFinal ="./errores.html";
+        try (PrintWriter out = new PrintWriter(rutaFinal)) {
+                    out.println(html);
+                    out.close();
     
+    }   catch (FileNotFoundException ex) {
+            Logger.getLogger(MetodosTS.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
+    }
 }
